@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Usuários | DomusHub</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="dashboard-page">
+<div class="dashboard-shell"><aside th:replace="~{fragments :: sidebar('users')}"></aside><main class="dashboard-main"><header th:replace="~{fragments :: topbar('Usuários')}"></header><div class="dashboard-content">
+  <div th:replace="~{fragments :: mensagens}"></div>
+
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">ADMINISTRAÇÃO</p>
+      <h1>Usuários</h1>
+      <p class="muted">Gerencie quem pode acessar a despensa. Inativar preserva o histórico de movimentações.</p>
+    </div>
+  </div>
+
+  <div class="two-columns">
+    <form th:action="@{/usuarios}" th:object="${usuario}" method="post" class="panel form-stack">
+      <h2>Novo usuário</h2>
+      <label>Nome<input th:field="*{nome}" required></label>
+      <label>E-mail<input type="email" th:field="*{email}" required></label>
+      <label>Senha inicial<input type="password" th:field="*{senha}" minlength="8" required></label>
+      <label>Perfil<select th:field="*{perfil}"><option th:each="p : ${perfis}" th:value="${p}" th:text="${p}"></option></select></label>
+      <button class="btn primary">Cadastrar usuário</button>
+    </form>
+
+    <section class="panel">
+      <h2>Usuários ativos</h2>
+      <p class="muted" th:if="${#lists.isEmpty(usuariosAtivos)}">Nenhum usuário ativo encontrado.</p>
+      <div class="simple-row" th:each="u : ${usuariosAtivos}">
+        <span>
+          <strong th:text="${u.nome}"></strong><br>
+          <small class="muted" th:text="${u.email}"></small>
+        </span>
+        <span class="user-list-actions">
+          <span class="pill" th:text="${u.perfil}"></span>
+          <span th:if="${u.email.equalsIgnoreCase(emailLogado)}" class="pill success">Você</span>
+          <form th:if="${!u.email.equalsIgnoreCase(emailLogado)}"
+                th:action="@{/usuarios/{id}/inativar(id=${u.id})}" method="post"
+                onsubmit="return confirm('Inativar este usuário? Ele perderá o acesso, mas seu histórico será preservado.');">
+            <button type="submit" class="btn danger-btn small">Inativar</button>
+          </form>
+        </span>
+      </div>
+
+      <hr th:if="${!#lists.isEmpty(usuariosInativos)}">
+      <h2 th:if="${!#lists.isEmpty(usuariosInativos)}">Usuários inativos</h2>
+      <div class="simple-row" th:each="u : ${usuariosInativos}">
+        <span>
+          <strong th:text="${u.nome}"></strong><br>
+          <small class="muted" th:text="${u.email}"></small>
+        </span>
+        <span class="user-list-actions">
+          <span class="pill" th:text="${u.perfil}"></span>
+          <span class="pill" style="background:#eee;color:#666">Inativo</span>
+          <form th:action="@{/usuarios/{id}/reativar(id=${u.id})}" method="post"
+                onsubmit="return confirm('Reativar este usuário e liberar novamente o acesso?');">
+            <button type="submit" class="btn primary small">Reativar</button>
+          </form>
+        </span>
+      </div>
+    </section>
+  </div>
+</div></main></div>
+</body>
+</html>

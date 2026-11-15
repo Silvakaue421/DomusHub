@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard | DomusHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="dashboard-page">
+<div class="dashboard-shell">
+  <aside th:replace="~{fragments :: sidebar('dashboard')}"></aside>
+
+  <main class="dashboard-main">
+    <header th:replace="~{fragments :: topbar('Visão geral')}"></header>
+
+    <div class="dashboard-content">
+      <div th:replace="~{fragments :: mensagens}"></div>
+      <section class="welcome-row">
+        <div>
+          <p class="eyebrow">PAINEL DE CONTROLE · VISÃO GERAL</p>
+          <h1>Sua despensa em <span>equilíbrio.</span></h1>
+          <p class="welcome-copy">Aqui você acompanha o que tem, o que precisa de atenção e as últimas movimentações.</p>
+        </div>
+        <a class="dashboard-primary-action" th:href="@{/produtos}"><span>▤</span> Acessar despensa <b>→</b></a>
+      </section>
+
+      <section class="dashboard-metrics" aria-label="Indicadores da despensa">
+        <article class="metric-card metric-products">
+          <div class="metric-top"><span class="metric-icon">▦</span><span class="metric-label">CATÁLOGO</span></div>
+          <strong class="metric-value" th:text="${totalProdutos}">0</strong>
+          <span class="metric-description">Produtos cadastrados</span>
+          <span class="metric-accent"></span>
+        </article>
+        <article class="metric-card metric-low">
+          <div class="metric-top"><span class="metric-icon">⌁</span><span class="metric-label">REPOSIÇÃO</span></div>
+          <strong class="metric-value" th:text="${#lists.size(estoqueBaixo)}">0</strong>
+          <span class="metric-description">Produtos com estoque baixo</span>
+          <span class="metric-accent"></span>
+        </article>
+        <article class="metric-card metric-expiring">
+          <div class="metric-top"><span class="metric-icon">◷</span><span class="metric-label">ATENÇÃO</span></div>
+          <strong class="metric-value" th:text="${#lists.size(lotesVencendo)}">0</strong>
+          <span class="metric-description">Lotes vencendo em 7 dias</span>
+          <span class="metric-accent"></span>
+        </article>
+        <article class="metric-card metric-expired">
+          <div class="metric-top"><span class="metric-icon">!</span><span class="metric-label">URGENTE</span></div>
+          <strong class="metric-value" th:text="${#lists.size(lotesVencidos)}">0</strong>
+          <span class="metric-description">Lotes vencidos com saldo</span>
+          <span class="metric-accent"></span>
+        </article>
+      </section>
+
+      <section class="dashboard-grid dashboard-grid-main">
+        <article class="surface-card movements-card">
+          <div class="surface-heading">
+            <div><span class="section-kicker">ACOMPANHAMENTO</span><h2>Movimentações recentes</h2></div>
+            <a class="text-link" th:href="@{/produtos}">Ver despensa <span>→</span></a>
+          </div>
+          <div class="empty-state" th:if="${#lists.isEmpty(movimentacoes)}"><span class="empty-symbol">↗</span><strong>Nenhuma movimentação por enquanto</strong><p>Quando houver entradas ou saídas, elas aparecerão aqui.</p></div>
+          <div class="dashboard-table-wrap" th:unless="${#lists.isEmpty(movimentacoes)}">
+            <table class="dashboard-table">
+              <thead><tr><th>Produto</th><th>Movimentação</th><th>Responsável</th><th>Data e hora</th></tr></thead>
+              <tbody>
+                <tr th:each="m : ${movimentacoes}">
+                  <td><strong th:text="${m.produto.nome}">Produto</strong></td>
+                  <td><span class="movement-tag" th:classappend="${m.tipo.name() == 'ENTRADA'} ? ' movement-entry' : ' movement-exit'" th:text="${m.tipo}">Entrada</span><span class="movement-quantity" th:text="${'· ' + m.quantidade}">· 1</span></td>
+                  <td class="table-muted" th:text="${m.usuario.nome}">Usuário</td>
+                  <td class="table-muted" th:text="${#temporals.format(m.dataHora, 'dd/MM/yyyy · HH:mm')}">09/11/2026</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="attention-card">
+          <div class="attention-decoration">✳</div>
+          <span class="attention-label">VISÃO DE CUIDADO</span>
+          <div class="attention-icon">!</div>
+          <h2>Um olhar atento<br>faz a diferença.</h2>
+          <p th:if="${!#lists.isEmpty(lotesVencidos)}" th:text="${#lists.size(lotesVencidos) + ' lote(s) vencido(s) ainda possuem quantidade em estoque.'}">Há itens que precisam de atenção.</p>
+          <p th:if="${#lists.isEmpty(lotesVencidos) and !#lists.isEmpty(lotesVencendo)}" th:text="${#lists.size(lotesVencendo) + ' lote(s) estão próximos do vencimento. Confira as validades.'}">Confira as validades.</p>
+          <p th:if="${#lists.isEmpty(lotesVencidos) and #lists.isEmpty(lotesVencendo)}">Sua despensa está sem alertas de validade neste momento.</p>
+          <a th:href="@{/produtos}" class="attention-link">Conferir produtos <span>→</span></a>
+        </article>
+      </section>
+
+      <section class="dashboard-grid dashboard-grid-lower">
+        <article class="surface-card list-card">
+          <div class="surface-heading">
+            <div><span class="section-kicker">ESTOQUE</span><h2>Precisam de reposição</h2></div>
+            <span class="count-chip" th:text="${#lists.size(estoqueBaixo)}">0</span>
+          </div>
+          <p class="compact-empty" th:if="${#lists.isEmpty(estoqueBaixo)}">Tudo certo! Nenhum produto está abaixo do estoque mínimo.</p>
+          <div class="dashboard-list-row" th:each="p : ${estoqueBaixo}"><span class="list-dot dot-warning"></span><div class="list-main"><strong th:text="${p.nome}">Produto</strong><small th:text="${'Mínimo: ' + p.estoqueMinimo + ' ' + p.unidade}">Mínimo</small></div><span class="list-amount" th:text="${p.quantidade + ' ' + p.unidade}">0 un.</span></div>
+        </article>
+
+        <article class="surface-card list-card">
+          <div class="surface-heading">
+            <div><span class="section-kicker">VALIDADE</span><h2>Próximos do vencimento</h2></div>
+            <span class="count-chip count-warning" th:text="${#lists.size(lotesVencendo)}">0</span>
+          </div>
+          <p class="compact-empty" th:if="${#lists.isEmpty(lotesVencendo)}">Nenhum lote com vencimento nos próximos 7 dias.</p>
+          <div class="dashboard-list-row" th:each="l : ${lotesVencendo}"><span class="list-dot dot-expiring"></span><div class="list-main"><strong th:text="${l.produto.nome}">Produto</strong><small th:text="${l.codigoVisual}">LOTE-001</small></div><span class="list-date" th:text="${#temporals.format(l.dataValidade, 'dd/MM/yyyy')}">09/11/2026</span><a class="row-open" th:href="@{/produtos/{id}/detalhes(id=${l.produto.id})}" aria-label="Ver detalhes do produto">→</a></div>
+        </article>
+      </section>
+
+      <section class="expired-strip" th:if="${!#lists.isEmpty(lotesVencidos)}">
+        <div class="expired-symbol">!</div><div class="expired-copy"><strong>Existem lotes vencidos com saldo</strong><span>Confira os itens e faça os ajustes necessários no estoque.</span></div>
+        <a th:href="@{/produtos}" class="expired-link">Revisar agora →</a>
+      </section>
+
+      <footer class="dashboard-footer"><span>Domus<span>Hub</span> · Sua despensa, em harmonia.</span><span>Organização que simplifica o dia a dia.</span></footer>
+    </div>
+  </main>
+</div>
+</body>
+</html>

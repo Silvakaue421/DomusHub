@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Detalhes do produto | DomusHub</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body class="dashboard-page"><div class="dashboard-shell"><aside th:replace="~{fragments :: sidebar('pantry')}"></aside><main class="dashboard-main"><header th:replace="~{fragments :: topbar('Detalhes do produto')}"></header><div class="dashboard-content">
+<div class="page-heading"><div><p class="eyebrow">DETALHES DO PRODUTO</p><h1 th:text="${produto.nome}">Produto</h1><p class="muted" th:text="${produto.categoria + ' · Estoque total: ' + produto.quantidade + ' ' + produto.unidade}"></p></div><a class="btn secondary" th:href="@{/produtos}">Voltar aos produtos</a></div>
+<div class="panel"><div class="panel-title"><h2>Lotes cadastrados</h2><span class="pill" th:text="${#lists.size(lotes) + ' lote(s)'}"></span></div>
+<div class="table-wrap"><table><thead><tr><th>Lote</th><th>Quantidade restante</th><th>Validade</th><th>Status</th></tr></thead><tbody>
+<tr th:each="l : ${lotes}"><td><strong th:text="${l.codigoVisual}"></strong><div class="muted lot-id" th:text="${'ID interno: #' + l.id}"></div></td><td th:text="${l.quantidade + ' ' + produto.unidade}"></td><td th:text="${#temporals.format(l.dataValidade, 'dd/MM/yyyy')}"></td>
+<td><span class="pill danger" th:if="${l.dataValidade.isBefore(T(java.time.LocalDate).now())}">Vencido</span><span class="pill muted-pill" th:if="${l.quantidade.compareTo(T(java.math.BigDecimal).ZERO) == 0}">Esgotado</span><span class="pill warning" th:if="${!l.dataValidade.isBefore(T(java.time.LocalDate).now()) and l.quantidade.compareTo(T(java.math.BigDecimal).ZERO) > 0 and !l.dataValidade.isAfter(T(java.time.LocalDate).now().plusDays(7))}">Vence em breve</span><span class="pill success" th:if="${l.dataValidade.isAfter(T(java.time.LocalDate).now().plusDays(7)) and l.quantidade.compareTo(T(java.math.BigDecimal).ZERO) > 0}">Disponível</span></td></tr>
+<tr th:if="${#lists.isEmpty(lotes)}"><td colspan="4" class="empty">Este produto ainda não possui lotes. Registre uma entrada para criar o primeiro lote.</td></tr>
+</tbody></table></div></div>
+</div></main></div></body></html>

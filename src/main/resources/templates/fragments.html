@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<aside th:fragment="sidebar(active)" class="sidebar">
+  <a class="sidebar-brand" th:href="@{/}" aria-label="DomusHub - início">
+    <img class="brand-image" th:src="@{/images/domushub-logo.png}" alt="DomusHub">
+  </a>
+  <p class="sidebar-caption">SUA DESPENSA, EM HARMONIA</p>
+  <nav class="side-navigation" aria-label="Navegação principal">
+    <a class="side-link" th:classappend="${active == 'dashboard'} ? ' active'" th:href="@{/}"><span class="side-icon">⌂</span><span>Dashboard</span></a>
+    <a class="side-link" th:classappend="${active == 'pantry'} ? ' active'" th:href="@{/produtos}"><span class="side-icon">▤</span><span>Despensa</span></a>
+    <a class="side-link" th:classappend="${active == 'new-product'} ? ' active'" th:href="@{/produtos/novo}" sec:authorize="hasRole('ADMIN')"><span class="side-icon">＋</span><span>Cadastrar produto</span></a>
+    <a class="side-link" th:classappend="${active == 'users'} ? ' active'" th:href="@{/usuarios}" sec:authorize="hasRole('ADMIN')"><span class="side-icon">♙</span><span>Usuários</span></a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="sidebar-tip"><span class="tip-mark">✦</span><strong>Pequenos cuidados,</strong><span>uma despensa melhor.</span></div>
+    <div class="sidebar-version">DOMUSHUB <span>•</span> CONTROLE INTELIGENTE</div>
+  </div>
+</aside>
+<header th:fragment="topbar(section)" class="dashboard-topbar">
+  <div class="breadcrumb"><span>DomusHub</span><b>/</b><strong th:text="${section}">Visão geral</strong></div>
+  <div class="topbar-account">
+    <span class="account-avatar" aria-hidden="true">D</span>
+    <span class="account-info"><strong sec:authentication="name">Usuário</strong><small>Conta conectada</small></span>
+    <form th:action="@{/logout}" method="post"><button class="logout-button" type="submit">Sair ↗</button></form>
+  </div>
+</header>
+<div th:fragment="mensagens">
+  <div class="alert success" th:if="${sucesso}" th:text="${sucesso}"></div>
+  <div class="alert error" th:if="${erro}" th:text="${erro}"></div>
+</div>
+</body></html>

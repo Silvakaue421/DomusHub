@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Entrar | DomusHub</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body class="login-page">
+<main class="login-card">
+  <div class="login-brand" aria-label="DomusHub"><span class="login-brand-text">Domus<span>Hub</span></span></div>
+  <p class="muted">A inteligência que organiza o seu lar.</p>
+  <div class="alert error" th:if="${param.error}">E-mail ou senha inválidos.</div>
+  <div class="alert success" th:if="${param.logout}">Você saiu do sistema.</div>
+  <div class="alert error" th:if="${param.inativo}">Sua conta foi inativada. Entre em contato com o administrador do sistema.</div>
+  <form th:action="@{/login}" method="post" class="form-stack">
+    <label>E-mail<input type="email" name="username" placeholder="seu@email.com" required></label>
+    <label>Senha<input type="password" name="password" placeholder="Sua senha" required></label>
+    <button class="btn primary full" type="submit">Entrar</button>
+  </form>
+  <p class="tiny">Ambiente acadêmico demonstrativo — use as credenciais do README.</p>
+</main>
+</body></html>

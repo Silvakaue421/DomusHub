@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Despensa | DomusHub</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body class="dashboard-page"><div class="dashboard-shell"><aside th:replace="~{fragments :: sidebar('pantry')}"></aside><main class="dashboard-main"><header th:replace="~{fragments :: topbar('Minha despensa')}"></header><div class="dashboard-content">
+<div th:replace="~{fragments :: mensagens}"></div>
+<div class="page-heading"><div><p class="eyebrow">CONTROLE DOMÉSTICO</p><h1>Minha despensa</h1><p class="muted">Consulte produtos, quantidades e validade.</p></div>
+<a sec:authorize="hasRole('ADMIN')" class="btn primary" th:href="@{/produtos/novo}">+ Novo produto</a></div>
+<form class="search" th:action="@{/produtos}" method="get"><input name="busca" th:value="${busca}" placeholder="Buscar produto pelo nome"><button class="btn secondary">Buscar</button></form>
+<div class="panel table-wrap"><table><thead><tr><th>Produto</th><th>Categoria</th><th>Quantidade</th><th>Estoque mínimo</th><th>Status</th><th>Ações</th></tr></thead>
+<tbody><tr th:each="p : ${produtos}">
+<td><strong th:text="${p.nome}"></strong></td><td th:text="${p.categoria}"></td>
+<td th:text="${p.quantidade + ' ' + p.unidade}"></td><td th:text="${p.estoqueMinimo + ' ' + p.unidade}"></td>
+<td><span class="pill danger" th:if="${p.quantidade.compareTo(p.estoqueMinimo) <= 0}">Estoque baixo</span><span class="pill success" th:unless="${p.quantidade.compareTo(p.estoqueMinimo) <= 0}">Normal</span></td>
+<td class="actions">
+<form th:action="@{/produtos/{id}/movimentar(id=${p.id})}" method="post" class="inline-form movement-form">
+<input type="number" name="quantidade" min="0.01" step="0.01" placeholder="Qtd." required>
+<select name="tipo" onchange="alternarValidade(this)"><option value="ENTRADA">Entrada</option><option value="SAIDA">Saída</option></select>
+<input type="date" name="validadeTexto" required aria-label="Validade do lote" title="Validade obrigatória para entrada">
+<button class="btn small secondary">Registrar</button></form>
+<div class="inline-form">
+<a class="btn small secondary" th:href="@{/produtos/{id}/detalhes(id=${p.id})}">Detalhes / lotes</a></div>
+<div sec:authorize="hasRole('ADMIN')" class="inline-form">
+<a class="btn small secondary" th:href="@{/produtos/{id}/editar(id=${p.id})}">Editar</a>
+<form th:action="@{/produtos/{id}/excluir(id=${p.id})}" method="post"><button class="btn small danger-btn" onclick="return confirm('Excluir este produto?')">Excluir</button></form>
+</div>
+</td></tr><tr th:if="${#lists.isEmpty(produtos)}"><td colspan="6" class="empty">Nenhum produto cadastrado.</td></tr></tbody></table></div>
+</div></main></div>
+<script>
+function alternarValidade(select) {
+  const campo = select.closest('form').querySelector('input[name="validadeTexto"]');
+  const entrada = select.value === 'ENTRADA';
+  campo.required = entrada;
+  campo.disabled = !entrada;
+  if (!entrada) campo.value = '';
+}
+document.querySelectorAll('.movement-form select').forEach(alternarValidade);
+</script>
+</body></html>
